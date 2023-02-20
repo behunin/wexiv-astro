@@ -1,0 +1,57 @@
+---
+import Wexiv from "../components/Wexiv";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Image Metadata View</title>
+		<meta name="description" content="Exiv2 compiled to WebAssembly" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link
+			rel="alternate icon"
+			href="/favicon.ico"
+			type="image/png"
+			sizes="16x16"
+		/>
+		<link
+			rel="apple-touch-icon"
+			href="/apple-touch-icon.png"
+			sizes="180x180"
+		/>
+		<link rel="mask-icon" href="/favicon.svg" color="#000" />
+		<meta name="theme-color" content="#000" />
+		<style>
+			body {
+				background-color: #2c3e50;
+			}
+
+			html {
+				font-family: Avenir, Helvetica, Arial, sans-serif;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+				background-color: #2c3e50;
+				color: aliceblue;
+				margin-top: 6px;
+			}
+		</style>
+	</head>
+	<body>
+		<header class="mx-3">
+			<p>This is a simple tool to read metadata from your images.</p>
+			<p>Created using emscripten to compile Exiv2 to WebAssembly.</p>
+			<p>
+				For your viewing pleasure at any time you visit this site,
+				metadata is locally stored using IndexedDB.
+			</p>
+			<p>
+				If you have already copied your metadata you can skip to step 3.
+			</p>
+		</header>
+		<main>
+			<Wexiv client:visible />
+		</main>
+	</body>
+</html>

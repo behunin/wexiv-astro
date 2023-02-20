@@ -1,0 +1,21 @@
+.steppin {
+    position: relative;
+    -moz-animation: mainFadeIn 2s linear infinite;
+    -webkit-animation: mainFadeIn 2s linear infinite;
+    -o-animation: mainFadeIn 2s linear infinite;
+    animation: mainFadeIn 2s linear 1;
+}
+
+@keyframes mainFadeIn {
+    0% {
+        left: 3px;
+    }
+
+    50% {
+        left: -3px;
+    }
+
+    100% {
+        left: 0px;
+    }
+}
