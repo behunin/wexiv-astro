@@ -1,6 +1,5 @@
 import { createSignal, Show } from 'solid-js';
 import DataTable from './DataTable';
-import wexiv from './wasm/wexiv.js';
 import './Wexiv.css';
 
 export default function Weiv() {
@@ -13,9 +12,10 @@ export default function Weiv() {
     const i2 = 'svg > path:nth-of-type(2)'
     const hidden = 'hidden'
 
-    function filezzz(e) {
-        const target = e.target
-        const file = target.files.item(0)
+    function filezzz(e: Event) {
+        const target = e.target as HTMLInputElement
+        const file = target.files?.item(0)
+        if (!file) return;
         const src = URL.createObjectURL(file)
         setPreview({ url: src });
         setFileName({ name: file.name });
@@ -57,9 +57,11 @@ export default function Weiv() {
                         if (icon3.classList.contains(hidden)) icon3.classList.toggle(hidden)
                         return
                     }
+                    let tmp = new Map()
                     all.result.forEach((element) => {
-                        setMetaData((current) => { current.set(element.name, element); return current; })
+                        tmp.set(element.name, element)
                     });
+                    setMetaData(() => tmp)
                     let icon1 = icons.querySelector(i1)!
                     if (!icon1.classList.contains(hidden)) icon1.classList.toggle(hidden)
                     let icon2 = icons.querySelector(i2)!
@@ -100,6 +102,7 @@ export default function Weiv() {
                 setMetaData((current) => { current.delete(rowName); return current; })
             }
         }
+        location.reload()
     }
 
     function clearIndex() {
@@ -134,36 +137,19 @@ export default function Weiv() {
 
     function meta() {
         let icons = document.getElementById('copy')!
-        wexiv().then((acc, rej) => {
-            if (rej) throw rej
-            const files = document.getElementById('files') as HTMLInputElement
-            const file = files.files?.item(0)
-            if (file) {
-                file.arrayBuffer().then((ab) => {
-                    try {
-                        const tmp = new Uint8Array(ab)
-                        const numBytes = tmp.length * tmp.BYTES_PER_ELEMENT
-                        const ptr = acc._malloc(numBytes)
-                        let heapBytes = acc.HEAPU8.subarray(ptr, ptr + numBytes)
-                        heapBytes.set(tmp)
-                        const nameBytesUTF8 = acc.lengthBytesUTF8(file.name)
-                        const namePtr = acc._malloc(nameBytesUTF8)
-                        acc.stringToUTF8(file.name, namePtr, namePtr + nameBytesUTF8)
-                        if (acc._getmeta(heapBytes.byteOffset, tmp.length, namePtr) !== 0) {
-                            throw "NOT Get Meta"
-                        }
-                        acc._free(heapBytes.byteOffset)
-                        acc._free(namePtr)
-                        let icon1 = icons.querySelector(i1)!
-                        if (!icon1.classList.contains(hidden)) icon1.classList.toggle(hidden)
-                        let icon2 = icons.querySelector(i2)!
-                        if (icon2.classList.contains(hidden)) icon2.classList.toggle(hidden)
-                        icons.classList.add('steppin')
-                    } catch (e) {
-                        throw e
-                    }
-                })
-            }
+        const files = document.getElementById('files') as HTMLInputElement
+        const file = files.files?.item(0)
+        if (!file) {
+            console.log("NO FILE");
+            return;
+        }
+        file.arrayBuffer().then((ab) => {
+            globalThis.workn.postMessage([ab, file.name]);
+            let icon1 = icons.querySelector(i1)!
+            if (!icon1.classList.contains(hidden)) icon1.classList.toggle(hidden)
+            let icon2 = icons.querySelector(i2)!
+            if (icon2.classList.contains(hidden)) icon2.classList.toggle(hidden)
+            icons.classList.add('steppin')
         }).catch((e) => {
             let icon2 = icons.querySelector(i2)!
             if (!icon2.classList.contains(hidden)) icon2.classList.toggle(hidden)
@@ -178,7 +164,7 @@ export default function Weiv() {
         <div class="grid grid-flow-row gap-3">
             <div class="align-middle py-3">
                 1
-                <label for="files" onClick={() => clearIcon()}
+                <label for="files" onClick={clearIcon}
                     class="px-5 py-2.5 rounded-lg border focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 bg-gray-800 text-gray-400 border-gray-600 hover:text-white hover:bg-gray-700">
                     Choose File
                 </label>
@@ -189,7 +175,7 @@ export default function Weiv() {
                     2
                     <button type="button"
                         class="py-2.5 px-5 mb-2 text-sm font-medium text-gray-400 rounded-lg border border-gray-600 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 bg-gray-800 hover:text-white hover:bg-gray-700"
-                        onClick={() => meta()}>Copy Metadata</button>
+                        onClick={meta}>Copy Metadata</button>
                     <br />
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" id="copy" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
@@ -210,7 +196,7 @@ export default function Weiv() {
                     3
                     <button type="button"
                         class="py-2.5 px-5 mb-2 text-sm font-medium text-gray-400 rounded-lg border border-gray-600 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 bg-gray-800 hover:text-white hover:bg-gray-700"
-                        onClick={() => getIndex()}>View Metadata</button>
+                        onClick={getIndex}>View Metadata</button>
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" id="view" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                     stroke-width="2">
@@ -231,7 +217,7 @@ export default function Weiv() {
         <div class="relative bottom-0 mt-20">
             <button type="button"
                 class="px-5 py-2.5 rounded-lg border focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 bg-gray-800 text-gray-400 border-gray-600 hover:text-white hover:bg-gray-700"
-                onClick={() => clearIndex()}>Clear Metadata Storage</button>
+                onClick={clearIndex}>Clear Metadata Storage</button>
         </div >
     </>);
 }

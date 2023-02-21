@@ -55,3 +55,21 @@ import Wexiv from "../components/Wexiv";
 		</main>
 	</body>
 </html>
+
+<script>
+	globalThis.workn = new Worker("worker.js");
+	globalThis.workn.onmessage = function (e) {
+		console.log(e);
+	};
+	globalThis.workn.onerror = function (e) {
+		const hidden = "hidden";
+		const i1 = "svg > path:nth-of-type(1)";
+		const i2 = "svg > path:nth-of-type(2)";
+		let icons = document.getElementById("copy")!;
+		let icon2 = icons.querySelector(i2)!;
+		if (!icon2.classList.contains(hidden)) icon2.classList.toggle(hidden);
+		let icon1 = icons.querySelector(i1)!;
+		if (icon1.classList.contains(hidden)) icon1.classList.toggle(hidden);
+		console.error(e);
+	};
+</script>
